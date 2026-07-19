@@ -22,7 +22,7 @@
   :root{
     --bg:#12151A; --surface:#1A1F27; --raised:#232A34; --line:#2E3742;
     --steel:#7C8B9C; --dim:#5A6775; --chalk:#E8EDF2;
-    --molten:#FF4A17; --molten-dim:#3A1A0F;
+    --molten:#FF4A; --molten-dim:#3A1A0F;
     --kelvin:#6EA8FF; --kelvin-dim:#14243D; --green:#4ADE80;
     --disp:'Oswald','Helvetica Neue',-apple-system,system-ui,sans-serif;
     --body:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Roboto,sans-serif;
@@ -38,7 +38,8 @@
     border-radius:6px;color:var(--chalk);padding:9px 10px;font-size:16px;font-weight:700;text-align:center}
   input::placeholder{color:var(--dim);font-weight:400;font-size:13px}
   input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-  input[type=number]{-moz-appearance:textfield}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+
   button:focus-visible,input:focus-visible{outline:2px solid var(--kelvin);outline-offset:2px}
   .hdr{padding:calc(20px + env(safe-area-inset-top)) 16px 14px;border-bottom:1px solid var(--line);
     display:flex;justify-content:space-between;align-items:baseline}
@@ -158,7 +159,35 @@
   .warn{padding:14px;border-radius:10px;background:var(--kelvin-dim);border:1px solid var(--kelvin);margin-bottom:14px}
   .warn b{font-family:var(--disp);font-size:14px;color:var(--kelvin);text-transform:uppercase;letter-spacing:.06em}
   .warn p{font-size:12.5px;color:var(--steel);margin-top:6px;line-height:1.5}
-  .hint{font-size:11px;color:var(--dim);margin-top:8px;line-height:1.5}
+  .hint{font-size:11px;color:var(--dim);margin-top:8px;line-height:1.5}.hero{padding:4px 0 20px}
+  .hero-g{font-size:13px;color:var(--steel)}
+  .hero-n{font-family:var(--disp);font-size:34px;font-weight:800;letter-spacing:.04em;
+    text-transform:uppercase;line-height:1.05;margin:2px 0 6px}
+  .hero-d{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em}
+  .today{border:1px solid var(--molten);background:var(--molten-dim);
+    border-radius:12px;padding:16px;margin-bottom:14px}
+  .today.rest{border-color:var(--line);background:var(--surface)}
+  .today-l{font-family:var(--mono);font-size:9px;color:var(--molten);letter-spacing:.14em}
+  .today.rest .today-l{color:var(--dim)}
+  .today-t{font-family:var(--disp);font-size:26px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.03em;margin:4px 0 2px}
+  .today-s{font-size:12.5px;color:var(--steel)}
+  .today-b{width:100%;margin-top:14px;padding:13px;border-radius:8px;
+    background:var(--molten);color:#12151A;font-family:var(--disp);font-size:14px;
+    font-weight:700;letter-spacing:.1em}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px}
+  .tile-l{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.1em}
+  .tile-v{font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-.02em;margin:3px 0}
+  .tile-v u{font-size:12px;color:var(--dim);text-decoration:none}
+  .tile-s{font-size:11px;color:var(--steel)}
+  .dots{display:flex;gap:6px}
+  .dot{flex:1;height:44px;border-radius:8px;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center}
+  .dot span{font-family:var(--mono);font-size:10px;color:var(--dim)}
+  .dot.on{background:var(--molten-dim);border-color:var(--molten)}
+  .dot.on span{color:var(--molten)}
+  .dot.now{border-color:var(--chalk)}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -347,31 +376,109 @@ var esc=function(s){var d=document.createElement('div');d.textContent=s;return d
    ══════════════════════════════════════════════════ */
 function render(){
   var dl=isDeload(S.week), ph=phaseFor(S.week);
+  var onHome = S.tab==='home';
 
   // weeks
   var wk=''; for(var w=1;w<=12;w++){
     wk+='<button class="wk'+(w===S.week?' on':'')+(isDeload(w)?' dl':'')+'" data-w="'+w+'">'+w+'</button>';
   }
   document.getElementById('weeks').innerHTML=wk;
-  document.getElementById('hmeta').textContent = ('WK '+S.week+' · '+ph.n).toUpperCase();
+  document.getElementById('hmeta').textContent = onHome ? '12 WEEK BLOCK' : ('WK '+S.week+' · '+ph.n).toUpperCase();
 
   // phase
   var p=document.getElementById('phase');
   p.className='phase'+(dl?' dl':'');
-  p.innerHTML='<h2>Week '+S.week+' · '+ph.n+'</h2><span class="pill">RPE '+ph.rpe+'</span><p>'+ph.note+'</p>';
+  document.getElementById('weeks').style.display = onHome ? 'none' : 'flex';
+  p.style.display = onHome ? 'none' : 'block';
+
 
   // nav
-  document.getElementById('nav').innerHTML=[['train','Train'],['cardio','Cardio'],['fuel','Fuel'],['track','Track']]
+  document.getElementById('nav').innerHTML=[['home','Home'],['train','Train'],['cardio','Cardio'],['fuel','Fuel'],['track','Track']]
     .map(function(t){return '<button class="'+(S.tab===t[0]?'on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>'}).join('');
 
   var v=document.getElementById('view');
+    if(S.tab==='home') v.innerHTML=viewHome();
   if(S.tab==='train') v.innerHTML=viewTrain();
   if(S.tab==='cardio') v.innerHTML=viewCardio();
   if(S.tab==='fuel') v.innerHTML=viewFuel();
   if(S.tab==='track') v.innerHTML=viewTrack();
   bind();
 }
+var DAY_BY_WEEKDAY=['rest','pushA','pullA','legsA','pushB','pullB','legsB'];
+function todaysDayId(){ return DAY_BY_WEEKDAY[new Date().getDay()]; }
 
+function sessionsDone(week){
+  var done=[];
+  DAYS.forEach(function(d){
+    for(var i=0;i<d.ex.length;i++){
+      var sets=S.log[K(week,d.id,i)];
+      if(sets && sets.some(function(s){return s&&s.r})){ done.push(d.id); break; }
+    }
+  });
+  return done;
+}
+
+function setsThisWeek(week){
+  var n=0;
+  Object.keys(S.log).forEach(function(k){
+    if(k.indexOf(week+'|')!==0) return;
+    (S.log[k]||[]).forEach(function(s){ if(s&&s.r) n++; });
+  });
+  return n;
+}
+
+function tile(label,val,sub){
+  return '<div class="tile"><div class="tile-l">'+label+'</div>'+
+         '<div class="tile-v">'+val+'</div><div class="tile-s">'+sub+'</div></div>';
+}
+
+function viewHome(){
+  var today=todaysDayId();
+  var day=DAYS.filter(function(d){return d.id===today})[0];
+  var ph=phaseFor(S.week);
+  var done=sessionsDone(S.week);
+  var sets=setsThisWeek(S.week);
+
+  var W=S.body.weights;
+  var r7=avg(W.slice(-7).map(function(x){return x.kg}));
+  var prior=avg(W.slice(-21,-14).map(function(x){return x.kg}));
+  var rate=(r7!==null&&prior!==null)?(prior-r7)/2:null;
+
+  var hour=new Date().getHours();
+  var greet=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+  var dateStr=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+
+  var h='<main style="padding-top:18px">';
+  h+='<div class="hero"><div class="hero-g">'+greet+'</div>'+
+     '<div class="hero-n">Pedro</div><div class="hero-d">'+dateStr+'</div></div>';
+
+  h+='<div class="today'+(day?'':' rest')+'"><div class="today-l">TODAY</div>';
+  if(day){
+    h+='<div class="today-t">'+day.label+'</div>';
+    h+='<div class="today-s">'+day.focus+' focus · '+day.ex.length+' exercises</div>';
+    h+='<button class="today-b" data-go="'+day.id+'">START SESSION →</button>';
+  } else {
+    h+='<div class="today-t">Rest</div>';
+    h+='<div class="today-s">45–50 min Zone 2 walk. Log your weight.</div>';
+  }
+  h+='</div>';
+
+  h+='<div class="grid">';
+  h+=tile('WEEK', S.week+'<u>/12</u>', ph.n);
+  h+=tile('SESSIONS', done.length+'<u>/6</u>', 'this week');
+  h+=tile('HARD SETS', sets, 'logged');
+  h+=tile('WEIGHT', (r7!==null?r7.toFixed(1):'—')+'<u>kg</u>',
+      rate===null?'need more data':(rate>0?'−':'+')+Math.abs(rate).toFixed(2)+' kg/wk');
+  h+='</div>';
+
+  h+='<div class="card"><h3>This week</h3><div class="dots">';
+  DAYS.forEach(function(d){
+    h+='<div class="dot'+(done.indexOf(d.id)>-1?' on':'')+(d.id===today?' now':'')+
+       '"><span>'+d.day+'</span></div>';
+  });
+  h+='</div></div>';
+  return h+'</main>';
+}
 function viewTrain(){
   var day=DAYS.filter(function(d){return d.id===S.dayId})[0], dl=isDeload(S.week);
   var h='<div class="days">'+DAYS.map(function(d){
