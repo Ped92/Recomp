@@ -272,15 +272,50 @@ var PHASES=[
 ];
 // Curated swap library. match = how well it hits the SAME muscle as the original.
 var SWAPS={
- 'Barbell Flat Bench Press':[
-   {n:'Flat DB Press',m:95},{n:'Chest-Supported Machine Press',m:88},
-   {n:'Smith Machine Bench',m:85},{n:'Weighted Dip',m:78}],
- 'Barbell Back Squat':[
-   {n:'Safety-Bar Squat',m:94},{n:'Hack Squat',m:92},
-   {n:'Pendulum Squat',m:88},{n:'Leg Press',m:80}],
- 'Barbell Row':[
-   {n:'Pendlay Row',m:96},{n:'Chest-Supported T-Bar Row',m:93},
-   {n:'Seal Row',m:90},{n:'Single-Arm DB Row',m:85}]
+ 'Barbell Flat Bench Press':[{n:'Flat DB Press',m:95},{n:'Chest-Supported Machine Press',m:88},{n:'Smith Machine Bench',m:85},{n:'Weighted Dip',m:78}],
+ 'Incline DB Press (30°)':[{n:'Incline Barbell Press',m:93},{n:'Incline Machine Press',m:88},{n:'Incline Smith Press',m:85}],
+ 'Machine Chest Press':[{n:'Hammer Strength Press',m:94},{n:'Flat DB Press',m:88},{n:'Weighted Dip',m:82}],
+ 'Cable Fly (mid-height)':[{n:'Pec Deck',m:93},{n:'DB Fly',m:88},{n:'Low-to-High Cable Fly',m:85}],
+ 'Low-to-High Cable Fly':[{n:'Incline DB Fly',m:90},{n:'Cable Fly (mid-height)',m:88},{n:'Pec Deck',m:85}],
+ 'Seated DB Lateral Raise':[{n:'Cable Lateral Raise',m:94},{n:'Machine Lateral',m:90},{n:'Leaning DB Lateral',m:88}],
+ 'Cable Lateral Raise (1-arm)':[{n:'DB Lateral Raise',m:94},{n:'Machine Lateral',m:90},{n:'Leaning DB Lateral',m:86}],
+ 'Seated DB Overhead Press':[{n:'Standing Barbell OHP',m:90},{n:'Arnold Press',m:87},{n:'Machine Shoulder Press',m:88},{n:'Smith Shoulder Press',m:85}],
+ 'Machine Shoulder Press':[{n:'Seated DB Press',m:90},{n:'Arnold Press',m:86},{n:'Landmine Press',m:80}],
+ 'Incline Barbell Press (30°)':[{n:'Incline DB Press',m:93},{n:'Incline Machine Press',m:88},{n:'Incline Smith Press',m:86}],
+ 'Overhead Rope Extension':[{n:'Cable Overhead Extension',m:92},{n:'EZ-Bar Skull Crusher',m:90},{n:'Overhead DB Extension',m:88}],
+ 'Cable Pushdown (straight bar)':[{n:'Rope Pushdown',m:94},{n:'Single-Arm Pushdown',m:88},{n:'Dip Machine',m:82}],
+ 'Single-Arm Cable Pushdown':[{n:'Rope Pushdown',m:92},{n:'Straight-Bar Pushdown',m:90},{n:'Kickback',m:80}],
+ 'Close-Grip Bench Press':[{n:'Weighted Dip',m:88},{n:'JM Press',m:86},{n:'Machine Dip',m:82}],
+ 'Barbell Row':[{n:'Pendlay Row',m:96},{n:'Chest-Supported T-Bar Row',m:93},{n:'Seal Row',m:90},{n:'Single-Arm DB Row',m:85}],
+ 'Chest-Supported Machine Row':[{n:'Hammer Strength Row',m:94},{n:'Single-Arm DB Row',m:88},{n:'Seal Row',m:86}],
+ 'Lat Pulldown (wide, pronated)':[{n:'Weighted Pull-Up',m:90},{n:'Neutral-Grip Pulldown',m:88},{n:'Assisted Pull-Up',m:85}],
+ 'Seated Cable Row (neutral)':[{n:'Chest-Supported Machine Row',m:92},{n:'Machine Row',m:88},{n:'Single-Arm Cable Row',m:86}],
+ 'Straight-Arm Cable Pullover':[{n:'DB Pullover',m:90},{n:'Machine Pullover',m:88},{n:'Lat Prayer',m:85}],
+ 'Weighted Pull-Up':[{n:'Neutral-Grip Pulldown',m:88},{n:'Lat Pulldown',m:87},{n:'Assisted Pull-Up',m:85}],
+ 'Neutral-Grip Lat Pulldown':[{n:'Close-Grip Pulldown',m:92},{n:'Machine Pulldown',m:88},{n:'Wide Pulldown',m:86}],
+ 'Single-Arm DB Row':[{n:'Meadows Row',m:90},{n:'Single-Arm Cable Row',m:88},{n:'Chest-Supported Row',m:85}],
+ 'Reverse Pec Deck':[{n:'Cable Face Pull',m:90},{n:'Incline Rear-Delt Fly',m:88},{n:'Bent-Over DB Fly',m:86}],
+ 'Cable Face Pull':[{n:'Reverse Pec Deck',m:92},{n:'Rear-Delt Fly',m:86},{n:'Band Pull-Apart',m:84}],
+ 'Barbell Shrug':[{n:'DB Shrug',m:94},{n:'Trap Bar Shrug',m:92},{n:'Machine Shrug',m:88}],
+ 'EZ-Bar Curl':[{n:'Barbell Curl',m:95},{n:'Cable Curl',m:90},{n:'DB Curl',m:88}],
+ 'Incline DB Curl':[{n:'Spider Curl',m:90},{n:'Preacher Curl',m:88},{n:'Cable Curl',m:85}],
+ 'Hammer Curl':[{n:'Rope Hammer Curl',m:93},{n:'Cross-Body Curl',m:90},{n:'Neutral DB Curl',m:88}],
+ 'Cable Curl':[{n:'Preacher Curl',m:90},{n:'EZ-Bar Curl',m:90},{n:'Machine Curl',m:88}],
+ 'Barbell Back Squat':[{n:'Safety-Bar Squat',m:94},{n:'Hack Squat',m:92},{n:'Pendulum Squat',m:88},{n:'Leg Press',m:80}],
+ 'Leg Press':[{n:'Hack Squat',m:90},{n:'Pendulum Squat',m:88},{n:'Machine Squat',m:85}],
+ 'Hack Squat':[{n:'Pendulum Squat',m:90},{n:'Front Squat',m:88},{n:'Leg Press (high foot)',m:85}],
+ 'Bulgarian Split Squat (DB)':[{n:'Walking Lunge',m:90},{n:'Smith Split Squat',m:88},{n:'Reverse Lunge',m:86}],
+ 'Leg Extension':[{n:'Single-Leg Extension',m:92},{n:'Sissy Squat',m:85},{n:'Goblet Squat',m:78}],
+ 'Walking DB Lunge':[{n:'Reverse Lunge',m:92},{n:'Bulgarian Split Squat',m:88},{n:'Step-Up',m:86}],
+ 'Lying Leg Curl':[{n:'Seated Leg Curl',m:92},{n:'Standing Leg Curl',m:90},{n:'Nordic Curl',m:88}],
+ 'Seated Leg Curl':[{n:'Lying Leg Curl',m:92},{n:'Standing Single-Leg Curl',m:88},{n:'Nordic Curl',m:86}],
+ 'Romanian Deadlift':[{n:'DB RDL',m:92},{n:'Weighted Back Extension',m:85},{n:'Good Morning',m:82}],
+ 'Hip Thrust (barbell)':[{n:'Smith Hip Thrust',m:92},{n:'Glute Bridge Machine',m:90},{n:'Cable Pull-Through',m:85}],
+ 'Standing Calf Raise':[{n:'Smith Calf Raise',m:92},{n:'Leg Press Calf Raise',m:88},{n:'Hack Squat Calf Raise',m:86}],
+ 'Seated Calf Raise':[{n:'Leg Press Calf Raise',m:88},{n:'Donkey Calf Raise',m:86},{n:'Standing Calf Raise',m:80}],
+ 'Hanging Leg Raise':[{n:"Captain's Chair Knee Raise",m:90},{n:'Lying Leg Raise',m:88},{n:'Cable Crunch',m:80}],
+ 'Cable Crunch':[{n:'Machine Crunch',m:90},{n:'Weighted Decline Sit-Up',m:85},{n:'Ab Wheel Rollout',m:82}],
+ 'Ab Wheel Rollout':[{n:'Cable Crunch',m:83},{n:'Hanging Leg Raise',m:82},{n:'Weighted Plank',m:80}]
 };
 var phaseFor=function(w){return PHASES.filter(function(p){return w>=p.w[0]&&w<=p.w[1]})[0]};
 var isDeload=function(w){return w===6||w===12};
