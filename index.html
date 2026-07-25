@@ -87,7 +87,9 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   .sets{padding:10px 14px}
   .row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
   .row:last-child{margin-bottom:0}
-  .idx{font-family:var(--mono);font-size:11px;color:var(--dim);width:14px;flex-shrink:0}
+  .idx{font-family:var(--mono);font-size:11px;color:var(--dim);width:14px;flex-shrink:0}.wu-row{opacity:.85}
+  .wu-idx{font-family:var(--mono);font-size:8px;line-height:1.1;color:var(--kelvin);
+    letter-spacing:.05em;text-align:center;width:16px}
   .row input{width:70px;flex-shrink:0}
   .row input.top{border-color:var(--molten);color:var(--molten)}
   .x{color:var(--dim);font-family:var(--mono);font-size:12px}
@@ -552,18 +554,9 @@ function viewTrain(){
        (ex.unit?' '+ex.unit:'')+' · RPE '+(dl?'5–6':ex.rpe)+' · '+rest+' rest</div></div><div class="ex-c">'+vd.done+'/'+vd.n+'</div></div>';
     if(ex.never) h+='<div class="never">Never take this to failure.</div>';
     if(last) h+='<div class="last">WK'+last.w+': '+last.sets.filter(function(s){return s&&s.w}).map(function(s){return s.w+'×'+s.r}).join('&nbsp;&nbsp;')+'</div>';var ramp=rampSets(workWeightFor(i), i===0);
-    if(ramp.length){
-      h+='<div class="ramp"><div class="ramp-h">Warm-up sets — build up to your working weight, don\'t log these</div>';
-      ramp.forEach(function(rs,ri){
-        h+='<div class="ramp-r"><span class="ramp-n">'+(ri+1)+'</span>'+
-           '<span class="ramp-w">'+(rs.w===20?'Empty bar':rs.w+' kg')+'</span>'+
-           '<span class="ramp-x">for</span>'+
-           '<span class="ramp-reps">'+rs.r+' reps</span></div>';
-      });
-      h+='</div>';
-    }
+    
 
-    h+='<div class="sets">';
+    h+='<div class="sets">'; 
     for(var si=0; si<n; si++){
       var s=sets[si]||{}, hitTop = s.r && Number(s.r)>=ex.r[1];
       h+='<div class="row"><div class="idx">'+(si+1)+'</div>';
@@ -706,7 +699,15 @@ function bind(){
   document.querySelectorAll('[data-rest]').forEach(function(b){
     b.onclick=function(){ startRest(+b.dataset.rest); };
   });
-  document.querySelectorAll('input[data-e]').forEach(function(inp){
+  document.querySelectorAll('input[data-f="wuw"],input[data-f="wur"]').forEach(function(inp){
+    inp.onchange=function(){
+      var k=K(S.week,S.dayId,+inp.dataset.e)+'|wu';
+      var wu=Object.assign({}, S.log[k]||{});
+      wu[inp.dataset.f==='wuw'?'w':'r']=inp.value;
+      S.log[k]=wu; save('rc:log',S.log);
+    };
+  });
+  document.querySelectorAll('input[data-e]') .forEach(function(inp){
     inp.onchange=function(){
       var k=K(S.week,S.dayId,+inp.dataset.e);
       var sets=(S.log[k]||[]).slice();
