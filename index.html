@@ -161,7 +161,18 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   .warn{padding:14px;border-radius:10px;background:var(--kelvin-dim);border:1px solid var(--kelvin);margin-bottom:14px}
   .warn b{font-family:var(--disp);font-size:14px;color:var(--kelvin);text-transform:uppercase;letter-spacing:.06em}
   .warn p{font-size:12.5px;color:var(--steel);margin-top:6px;line-height:1.5}
-  .hint{font-size:11px;color:var(--dim);margin-top:8px;line-height:1.5}.hero{padding:4px 0 20px}
+  .swap-sum{font-family:var(--mono);font-size:11px;color:var(--kelvin);letter-spacing:.08em;
+    text-transform:uppercase;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+  .swap-sum::-webkit-details-marker{display:none}
+  .swap-body{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .swap-opt{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;
+    background:var(--bg);border:1px solid var(--line);text-align:left;width:100%}
+  .swap-n{flex:1;font-size:13px;color:var(--chalk);font-weight:500}
+  .swap-bar{width:50px;height:5px;border-radius:3px;background:var(--line);overflow:hidden;flex-shrink:0}
+  .swap-bar span{display:block;height:100%}
+  .swap-pct{font-family:var(--mono);font-size:12px;font-weight:700;min-width:34px;text-align:right}
+  .swap-keep{padding:9px;border-radius:8px;background:transparent;border:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;color:var(--dim);width:100%;text-align:center;margin-top:2px}.hero{padding:4px 0 20px}
   .hero-g{font-size:13px;color:var(--steel)}
   .hero-n{font-family:var(--disp);font-size:34px;font-weight:800;letter-spacing:.04em;
     text-transform:uppercase;line-height:1.05;margin:2px 0 6px}
@@ -259,6 +270,18 @@ var PHASES=[
  {w:[9,11],n:'Peak',rpe:'8–9',note:'Last set of every isolation goes to true failure. Never the squat or RDL.'},
  {w:[12,12],n:'Deload / Test',rpe:'5–6',note:'Recover, re-test key lifts, take photos.'}
 ];
+// Curated swap library. match = how well it hits the SAME muscle as the original.
+var SWAPS={
+ 'Barbell Flat Bench Press':[
+   {n:'Flat DB Press',m:95},{n:'Chest-Supported Machine Press',m:88},
+   {n:'Smith Machine Bench',m:85},{n:'Weighted Dip',m:78}],
+ 'Barbell Back Squat':[
+   {n:'Safety-Bar Squat',m:94},{n:'Hack Squat',m:92},
+   {n:'Pendulum Squat',m:88},{n:'Leg Press',m:80}],
+ 'Barbell Row':[
+   {n:'Pendlay Row',m:96},{n:'Chest-Supported T-Bar Row',m:93},
+   {n:'Seal Row',m:90},{n:'Single-Arm DB Row',m:85}]
+};
 var phaseFor=function(w){return PHASES.filter(function(p){return w>=p.w[0]&&w<=p.w[1]})[0]};
 var isDeload=function(w){return w===6||w===12};
 
@@ -335,8 +358,11 @@ var S = {
   dayId: load('rc:day', 'pushA'),
   tab:   'train',
   log:   load('rc:log', {}),
-  body:  load('rc:body', {weights:[], waist:[]})
+  body:  load('rc:body', {weights:[], waist:[]}),
+  swaps: load('rc:swaps', {})
 };
+
+function exDisplayName(ex,i){ return S.swaps[S.dayId+'|'+i] || ex.n; }
 
 var setsFor=function(base){
   // Weeks 1-2 ramp in via INTENSITY (RPE 6-7), not set count.
@@ -543,6 +569,20 @@ function workWeightFor(exIdx){
   var last=lastSession(exIdx);
   if(last){ var f=last.sets.filter(function(s){return s&&s.w})[0]; if(f) return Number(f.w); }
   return null;
+}function swapPanel(ex,i){
+  var opts=SWAPS[ex.n];
+  if(!opts) return '<details><summary>Swap this exercise</summary><div>→ '+ex.sub.map(esc).join('<br>→ ')+'</div></details>';
+  var cur=S.swaps[S.dayId+'|'+i];
+  var h='<details class="swap"><summary class="swap-sum">↔ Swap exercise</summary><div class="swap-body">';
+  opts.forEach(function(o){
+    var col = o.m>=90 ? 'var(--green)' : 'var(--molten)';
+    h+='<button class="swap-opt" data-swap="'+i+'" data-name="'+esc(o.n)+'">'+
+       '<span class="swap-n">'+esc(o.n)+'</span>'+
+       '<span class="swap-bar"><span style="width:'+o.m+'%;background:'+col+'"></span></span>'+
+       '<span class="swap-pct" style="color:'+col+'">'+o.m+'%</span></button>';
+  });
+  if(cur) h+='<button class="swap-keep" data-swap="'+i+'" data-name="">↩ Back to '+esc(ex.n)+'</button>';
+  return h+'</div></details>';
 }
 function viewTrain(){
   var day=DAYS.filter(function(d){return d.id===S.dayId})[0], dl=isDeload(S.week);
@@ -557,7 +597,7 @@ function viewTrain(){
     var rest = Math.floor(ex.rest/60)+':'+String(ex.rest%60).padStart(2,'0');
 
     h+='<div class="ex'+(vd.st==='hot'?' hot':'')+'">';
-    h+='<div class="ex-h"><div><div class="ex-n">'+esc(ex.n)+'</div><div class="ex-s">'+n+' × '+rng+
+    h+='<div class="ex-h"><div><div class="ex-n">'+esc(exDisplayName(ex,i))+'</div><div class="ex-s">'+n+' × '+rng+
        (ex.unit?' '+ex.unit:'')+' · RPE '+(dl?'5–6':ex.rpe)+' · '+rest+' rest</div></div><div class="ex-c">'+vd.done+'/'+vd.n+'</div></div>';
     if(ex.never) h+='<div class="never">Never take this to failure.</div>';
    if(last) h+='<div class="last">WK'+last.w+': '+last.sets.filter(function(s){return s&&s.w}).map(function(s){return s.w+'×'+s.r}).join('&nbsp;&nbsp;')+'</div>';
@@ -595,7 +635,7 @@ function viewTrain(){
     if(vd.st==='hot') h+='<div class="v-hot">▲ Add weight next session — +'+ex.inc+'kg</div>';
     else if(vd.st==='hold') h+='<div class="v-txt">Hold this weight. Climb to '+ex.r[1]+' reps on all sets, then add '+ex.inc+'kg.</div>';
     else if(vd.st==='deload') h+='<div class="v-dl">Deload logged. No progression this week — that\'s the point.</div>';
-    else h+='<details><summary>Swap this exercise</summary><div>→ '+ex.sub.map(esc).join('<br>→ ')+'</div></details>';
+    else h+=swapPanel(ex,i);
     h+='</div></div>';
   });
   return h+'</main>';
@@ -717,6 +757,14 @@ function bind(){
   });
   document.querySelectorAll('[data-rest]').forEach(function(b){
     b.onclick=function(){ startRest(+b.dataset.rest); };
+  });
+  document.querySelectorAll('[data-swap]').forEach(function(b){
+    b.onclick=function(){
+      var key=S.dayId+'|'+b.dataset.swap;
+      if(b.dataset.name){ S.swaps[key]=b.dataset.name; }
+      else { delete S.swaps[key]; }
+      save('rc:swaps',S.swaps); render();
+    };
   });
   document.querySelectorAll('input[data-f="wuw"],input[data-f="wur"]').forEach(function(inp){
     inp.onchange=function(){
