@@ -188,6 +188,11 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   .dot.on{background:var(--molten-dim);border-color:var(--molten)}
   .dot.on span{color:var(--molten)}
   .dot.now{border-color:var(--chalk)}
+  .ramp{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;background:var(--bg);
+    border-bottom:1px solid var(--line);align-items:center}
+  .ramp-l{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.1em;margin-right:2px}
+  .ramp-s{font-family:var(--mono);font-size:10.5px;color:var(--steel);
+    background:var(--raised);border-radius:5px;padding:3px 7px}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -478,6 +483,53 @@ function viewHome(){
   });
   h+='</div></div>';
   return h+'</main>';
+}function roundLoad(kg){ return Math.round(kg/2.5)*2.5; }
+
+function rampSets(work, first){
+  if(!work || work<=20) return [];
+  if(!first) return [{w:roundLoad(work*0.6), r:5, label:'feeder'}];
+  var steps=[{pct:0,r:10,label:'bar'},{pct:.4,r:6},{pct:.65,r:4},{pct:.85,r:2},{pct:.95,r:1}];
+  var out=[];
+  steps.forEach(function(s){
+    var w = s.pct===0 ? 20 : roundLoad(work*s.pct);
+    if(out.length && Math.abs(w-out[out.length-1].w)<5) return;
+    if(work-w<5 && s.pct!==0) return;
+    out.push({w:w, r:s.r, label:s.label});
+  });
+  return out;
+}
+
+function workWeightFor(exIdx){
+  var sets=S.log[K(S.week,S.dayId,exIdx)]||[];
+  if(sets[0] && sets[0].w) return Number(sets[0].w);
+  var last=lastSession(exIdx);
+  if(last){ var f=last.sets.filter(function(s){return s&&s.w})[0]; if(f) return Number(f.w); }
+  return null;
+}
+
+
+function roundLoad(kg){ return Math.round(kg/2.5)*2.5; }
+
+function rampSets(work, first){
+  if(!work || work<=20) return [];
+  if(!first) return [{w:roundLoad(work*0.6), r:5, label:'feeder'}];
+  var steps=[{pct:0,r:10,label:'bar'},{pct:.4,r:6},{pct:.65,r:4},{pct:.85,r:2},{pct:.95,r:1}];
+  var out=[];
+  steps.forEach(function(s){
+    var w = s.pct===0 ? 20 : roundLoad(work*s.pct);
+    if(out.length && Math.abs(w-out[out.length-1].w)<5) return;
+    if(work-w<5 && s.pct!==0) return;
+    out.push({w:w, r:s.r, label:s.label});
+  });
+  return out;
+}
+
+function workWeightFor(exIdx){
+  var sets=S.log[K(S.week,S.dayId,exIdx)]||[];
+  if(sets[0] && sets[0].w) return Number(sets[0].w);
+  var last=lastSession(exIdx);
+  if(last){ var f=last.sets.filter(function(s){return s&&s.w})[0]; if(f) return Number(f.w); }
+  return null;
 }
 function viewTrain(){
   var day=DAYS.filter(function(d){return d.id===S.dayId})[0], dl=isDeload(S.week);
@@ -495,7 +547,14 @@ function viewTrain(){
     h+='<div class="ex-h"><div><div class="ex-n">'+esc(ex.n)+'</div><div class="ex-s">'+n+' × '+rng+
        (ex.unit?' '+ex.unit:'')+' · RPE '+(dl?'5–6':ex.rpe)+' · '+rest+' rest</div></div><div class="ex-c">'+vd.done+'/'+vd.n+'</div></div>';
     if(ex.never) h+='<div class="never">Never take this to failure.</div>';
-    if(last) h+='<div class="last">WK'+last.w+': '+last.sets.filter(function(s){return s&&s.w}).map(function(s){return s.w+'×'+s.r}).join('&nbsp;&nbsp;')+'</div>';
+    if(last) h+='<div class="last">WK'+last.w+': '+last.sets.filter(function(s){return s&&s.w}).map(function(s){return s.w+'×'+s.r}).join('&nbsp;&nbsp;')+'</div>';var ramp=rampSets(workWeightFor(i), i===0);
+    if(ramp.length){
+      h+='<div class="ramp"><span class="ramp-l">WARM-UP</span>';
+      ramp.forEach(function(rs){
+        h+='<span class="ramp-s">'+rs.w+'×'+rs.r+'</span>';
+      });
+      h+='</div>';
+    }
 
     h+='<div class="sets">';
     for(var si=0; si<n; si++){
