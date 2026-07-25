@@ -188,11 +188,15 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   .dot.on{background:var(--molten-dim);border-color:var(--molten)}
   .dot.on span{color:var(--molten)}
   .dot.now{border-color:var(--chalk)}
-  .ramp{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;background:var(--bg);
-    border-bottom:1px solid var(--line);align-items:center}
-  .ramp-l{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.1em;margin-right:2px}
-  .ramp-s{font-family:var(--mono);font-size:10.5px;color:var(--steel);
-    background:var(--raised);border-radius:5px;padding:3px 7px}
+  .ramp.ramp{padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .ramp-h{font-size:11px;color:var(--dim);line-height:1.4;margin-bottom:8px}
+  .ramp-r{display:flex;align-items:center;gap:8px;padding:4px 0}
+  .ramp-n{font-family:var(--mono);font-size:10px;color:var(--dim);width:16px;
+    height:16px;border:1px solid var(--line);border-radius:4px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ramp-w{font-family:var(--mono);font-size:12.5px;color:var(--steel);min-width:74px}
+  .ramp-x{font-size:10px;color:var(--dim)}
+  .ramp-reps{font-family:var(--mono);font-size:12.5px;color:var(--steel)}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -549,9 +553,12 @@ function viewTrain(){
     if(ex.never) h+='<div class="never">Never take this to failure.</div>';
     if(last) h+='<div class="last">WK'+last.w+': '+last.sets.filter(function(s){return s&&s.w}).map(function(s){return s.w+'×'+s.r}).join('&nbsp;&nbsp;')+'</div>';var ramp=rampSets(workWeightFor(i), i===0);
     if(ramp.length){
-      h+='<div class="ramp"><span class="ramp-l">WARM-UP</span>';
-      ramp.forEach(function(rs){
-        h+='<span class="ramp-s">'+rs.w+'×'+rs.r+'</span>';
+      h+='<div class="ramp"><div class="ramp-h">Warm-up sets — build up to your working weight, don\'t log these</div>';
+      ramp.forEach(function(rs,ri){
+        h+='<div class="ramp-r"><span class="ramp-n">'+(ri+1)+'</span>'+
+           '<span class="ramp-w">'+(rs.w===20?'Empty bar':rs.w+' kg')+'</span>'+
+           '<span class="ramp-x">for</span>'+
+           '<span class="ramp-reps">'+rs.r+' reps</span></div>';
       });
       h+='</div>';
     }
