@@ -1,5 +1,5 @@
 /* Bump CACHE version on every deploy to push updates to installed phones. */
-const CACHE = 'recomp-v2';
+const CACHE = 'recomp-v3';
 const ASSETS = [
   './',
   './index.html',
