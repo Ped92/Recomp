@@ -557,6 +557,13 @@ function viewTrain(){
     
 
     h+='<div class="sets">'; 
+      var wu=S.log[K(S.week,S.dayId,i)+'|wu']||{};
+    h+='<div class="row wu-row"><div class="idx wu-idx">WARM<br>UP</div>';
+    h+='<input type="number" inputmode="decimal" placeholder="kg" value="'+(wu.w||'')+'" data-e="'+i+'" data-f="wuw">';
+    h+='<span class="x">×</span>';
+    h+='<input type="number" inputmode="numeric" placeholder="reps" value="'+(wu.r||'')+'" data-e="'+i+'" data-f="wur">';
+    h+='<div class="track"></div>';
+    h+='<button class="rest" data-rest="'+ex.rest+'">REST</button></div>';
     for(var si=0; si<n; si++){
       var s=sets[si]||{}, hitTop = s.r && Number(s.r)>=ex.r[1];
       h+='<div class="row"><div class="idx">'+(si+1)+'</div>';
