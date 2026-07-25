@@ -497,11 +497,20 @@ function sessionsDone(week){
   return done;
 }
 
+function exFromKey(k){
+  var parts=k.split('|');          // "3|legsA|2"
+  var day=DAYS.filter(function(d){return d.id===parts[1]})[0];
+  if(!day) return null;
+  return day.ex[+parts[2]];
+}
 function setsThisWeek(week){
   var n=0;
   Object.keys(S.log).forEach(function(k){
     if(k.indexOf(week+'|')!==0) return;
-    (S.log[k]||[]).forEach(function(s){ if(s&&s.r) n++; });
+    if(k.indexOf('|wu')>-1) return;              // skip warm-up keys
+    var ex=exFromKey(k);
+    var mult=(ex && ex.unit) ? 2 : 1;            // per-side counts double
+    (S.log[k]||[]).forEach(function(s){ if(s&&s.r) n+=mult; });
   });
   return n;
 }
@@ -572,15 +581,6 @@ function rampSets(work, first){
   });
   return out;
 }
-
-function workWeightFor(exIdx){
-  var sets=S.log[K(S.week,S.dayId,exIdx)]||[];
-  if(sets[0] && sets[0].w) return Number(sets[0].w);
-  var last=lastSession(exIdx);
-  if(last){ var f=last.sets.filter(function(s){return s&&s.w})[0]; if(f) return Number(f.w); }
-  return null;
-}
-
 
 function roundLoad(kg){ return Math.round(kg/2.5)*2.5; }
 
@@ -799,14 +799,6 @@ function bind(){
       if(b.dataset.name){ S.swaps[key]=b.dataset.name; }
       else { delete S.swaps[key]; }
       save('rc:swaps',S.swaps); render();
-    };
-  });
-  document.querySelectorAll('input[data-f="wuw"],input[data-f="wur"]').forEach(function(inp){
-    inp.onchange=function(){
-      var k=K(S.week,S.dayId,+inp.dataset.e)+'|wu';
-      var wu=Object.assign({}, S.log[k]||{});
-      wu[inp.dataset.f==='wuw'?'w':'r']=inp.value;
-      S.log[k]=wu; save('rc:log',S.log);
     };
   });
   document.querySelectorAll('input[data-e]') .forEach(function(inp){
