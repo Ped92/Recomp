@@ -22,7 +22,7 @@
   :root{
     --bg:#12151A; --surface:#1A1F27; --raised:#232A34; --line:#2E3742;
     --steel:#7C8B9C; --dim:#5A6775; --chalk:#E8EDF2;
-    --molten:#FF4A; --molten-dim:#3A1A0F;
+    --molten:#FF4A17; --molten-dim:#3A1A0F;
     --kelvin:#6EA8FF; --kelvin-dim:#14243D; --green:#4ADE80;
     --disp:'Oswald','Helvetica Neue',-apple-system,system-ui,sans-serif;
     --body:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Roboto,sans-serif;
@@ -190,7 +190,14 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   .dot.on{background:var(--molten-dim);border-color:var(--molten)}
   .dot.on span{color:var(--molten)}
   .dot.now{border-color:var(--chalk)}
-  .ramp.ramp{padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .ramp{background:var(--bg);border-bottom:1px solid var(--line)}
+  .ramp-sum{font-family:var(--mono);font-size:11px;color:var(--kelvin);
+    letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:10px 14px;
+    list-style:none;display:flex;align-items:center;gap:6px}
+  .ramp-sum::-webkit-details-marker{display:none}
+  .ramp-sum::before{content:'▸';font-size:10px}
+  details[open] .ramp-sum::before{content:'▾'}
+  .ramp-body{padding:0 14px 10px}
   .ramp-h{font-size:11px;color:var(--dim);line-height:1.4;margin-bottom:8px}
   .ramp-r{display:flex;align-items:center;gap:8px;padding:4px 0}
   .ramp-n{font-family:var(--mono);font-size:10px;color:var(--dim);width:16px;
@@ -553,17 +560,22 @@ function viewTrain(){
     h+='<div class="ex-h"><div><div class="ex-n">'+esc(ex.n)+'</div><div class="ex-s">'+n+' × '+rng+
        (ex.unit?' '+ex.unit:'')+' · RPE '+(dl?'5–6':ex.rpe)+' · '+rest+' rest</div></div><div class="ex-c">'+vd.done+'/'+vd.n+'</div></div>';
     if(ex.never) h+='<div class="never">Never take this to failure.</div>';
-    if(last) h+='<div class="last">WK'+last.w+': '+last.sets.filter(function(s){return s&&s.w}).map(function(s){return s.w+'×'+s.r}).join('&nbsp;&nbsp;')+'</div>';var ramp=rampSets(workWeightFor(i), i===0);
-    
+   if(last) h+='<div class="last">WK'+last.w+': '+last.sets.filter(function(s){return s&&s.w}).map(function(s){return s.w+'×'+s.r}).join('&nbsp;&nbsp;')+'</div>';
 
-    h+='<div class="sets">'; 
-      var wu=S.log[K(S.week,S.dayId,i)+'|wu']||{};
-    h+='<div class="row wu-row"><div class="idx wu-idx">WARM<br>UP</div>';
-    h+='<input type="number" inputmode="decimal" placeholder="kg" value="'+(wu.w||'')+'" data-e="'+i+'" data-f="wuw">';
-    h+='<span class="x">×</span>';
-    h+='<input type="number" inputmode="numeric" placeholder="reps" value="'+(wu.r||'')+'" data-e="'+i+'" data-f="wur">';
-    h+='<div class="track"></div>';
-    h+='<button class="rest" data-rest="'+ex.rest+'">REST</button></div>';
+    var ramp=rampSets(workWeightFor(i), i===0);
+    if(ramp.length){
+      h+='<details class="ramp"><summary class="ramp-sum">Warm-up sets</summary>';
+      h+='<div class="ramp-body"><div class="ramp-h">Build up to your working weight — don\'t log these</div>';
+      ramp.forEach(function(rs,ri){
+        h+='<div class="ramp-r"><span class="ramp-n">'+(ri+1)+'</span>'+
+           '<span class="ramp-w">'+(rs.w===20?'Empty bar':rs.w+' kg')+'</span>'+
+           '<span class="ramp-x">for</span>'+
+           '<span class="ramp-reps">'+rs.r+' reps</span></div>';
+      });
+      h+='</div></details>';
+    }
+
+    h+='<div class="sets">';
     for(var si=0; si<n; si++){
       var s=sets[si]||{}, hitTop = s.r && Number(s.r)>=ex.r[1];
       h+='<div class="row"><div class="idx">'+(si+1)+'</div>';
