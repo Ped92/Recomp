@@ -159,10 +159,26 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
     opacity:0;pointer-events:none;transition:opacity .25s}
   #toast.on{opacity:1}
   .warn{padding:14px;border-radius:10px;background:var(--kelvin-dim);border:1px solid var(--kelvin);margin-bottom:14px}
+  .rest-card{margin:0 16px 100px;border-radius:12px;border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.rest-h{font-family:var(--disp);font-size:15.5px;font-weight:500;text-transform:uppercase;letter-spacing:.02em;padding:13px 14px 11px;border-bottom:1px solid var(--line)}
+.rest-sub{font-size:12.5px;color:var(--steel);padding:14px 14px 0}
+.rest-prog{font-family:var(--mono);font-size:12px;color:var(--dim);padding:14px;text-align:center}
+.rest-card button.nextwk{margin:0 14px 16px;width:calc(100% - 28px)}
+button.nextwk.off{background:var(--raised)!important;color:var(--dim)!important;cursor:not-allowed}
   .warn b{font-family:var(--disp);font-size:14px;color:var(--kelvin);text-transform:uppercase;letter-spacing:.06em}
   .warn p{font-size:12.5px;color:var(--steel);margin-top:6px;line-height:1.5}
   .swap-sum{font-family:var(--mono);font-size:11px;color:var(--kelvin);letter-spacing:.08em;
-    text-transform:uppercase;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+    .nextwk{width:100%;padding:12px;border-radius:8px;background:var(--molten-dim);
+    border:1px solid var(--molten);color:var(--molten);font-family:var(--disp);
+    font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+    text-transform:uppercase;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}.nextwk-wrap{margin:24px 16px 8px;padding-top:20px;border-top:1px solid var(--line);text-align:center}
+  .nextwk-sub{font-size:11px;color:var(--dim);margin-top:10px;line-height:1.4}button.nextwk{width:100%;padding:15px;border-radius:10px;background:var(--molten);.rest-card{margin:20px 16px;padding:24px 18px;border:1px solid var(--line);border-radius:12px;text-align:center}
+  .rest-h{font-family:var(--disp);font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .rest-sub{font-size:12.5px;color:var(--steel);margin-top:6px}
+  .rest-prog{font-family:var(--mono);font-size:12px;color:var(--dim);margin:18px 0 14px}
+  button.nextwk.off{background:var(--raised);color:var(--dim);cursor:not-allowed}
+    border:none;color:#12151A;font-family:var(--disp);font-size:15px;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;cursor:pointer;display:block;list-style:none}
   .swap-sum::-webkit-details-marker{display:none}
   .swap-body{margin-top:10px;display:flex;flex-direction:column;gap:6px}
   .swap-opt{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;
@@ -371,7 +387,7 @@ var DAYS=[
  {n:'Walking DB Lunge',s:3,r:[12,12],perLeg:[6,6],rpe:'8–9',rest:120,inc:2,sub:['Reverse Lunge','Step-Up'],unit:'per leg'},,
  {n:'Leg Extension',s:3,r:[12,15],rpe:'9–10',rest:90,inc:5,sub:['Sissy Squat','High-Rep Goblet Squat']},
  {n:'Seated Calf Raise',s:4,r:[12,15],rpe:'9–10',rest:75,inc:5,sub:['Leg Press Calf Raise','Donkey Calf Raise']},
- {n:'Ab Wheel Rollout',s:3,r:[10,12],rpe:'9',rest:60,inc:0,sub:['Hanging Leg Raise','Weighted Plank']}]}
+ {n:'Ab Wheel Rollout',s:3,r:[10,12],rpe:'9',rest:60,inc:0,sub:['Hanging Leg Raise','Weighted Plank']}]},{id:'rest',label:'Rest',focus:'Recovery',day:'Sun',ex:[]}
 ];
 
 var CARDIO=[{w:[1,2],s:3,m:30,st:'8,000'},{w:[3,5],s:4,m:35,st:'9,000'},{w:[6,6],s:3,m:25,st:'8,000'},
@@ -619,12 +635,69 @@ function workWeightFor(exIdx){
   if(cur) h+='<button class="swap-keep" data-swap="'+i+'" data-name="">↩ Back to '+esc(ex.n)+'</button>';
   return h+'</div></details>';
 }
+function startNextWeek(){
+  var from=S.week, to=from+1;
+  if(to>12){ toast('Already at week 12'); return; }
+  var moved=0;
+  DAYS.forEach(function(day){
+    day.ex.forEach(function(ex,i){
+      var sets=S.log[K(from,day.id,i)]||[];
+      var done=sets.filter(function(s){return s&&s.r&&s.w});
+      if(!done.length) return;
+      var topWeight=Math.max.apply(null, done.map(function(s){return Number(s.w);}));
+      var allTop=done.every(function(s){return Number(s.r)>=ex.r[1];});
+      var newW = allTop ? roundLoad(topWeight+ex.inc) : topWeight;
+      var n = isDeload(to) ? Math.max(1,Math.round(ex.s*0.5)) : ex.s;
+      var out=[];
+      for(var k=0;k<n;k++) out.push({w:newW});
+      S.log[K(to,day.id,i)]=out;
+      moved++;
+    });
+  });
+  save('rc:log',S.log);
+  S.week=to; save('rc:week',S.week);
+  toast('Week '+to+' loaded — '+moved+' exercises carried forward');
+  render();
+}
+function weekComplete(week){
+  return DAYS.filter(function(d){return d.id!=='rest';}).every(function(d){
+    for(var i=0;i<d.ex.length;i++){
+      var sets=S.log[K(week,d.id,i)];
+      if(sets && sets.some(function(s){return s&&s.r})) return true;
+    }
+    return false;
+  });
+}
+function trainedCount(week){
+  return DAYS.filter(function(d){return d.id!=='rest';}).filter(function(d){
+    for(var i=0;i<d.ex.length;i++){
+      var s=S.log[K(week,d.id,i)];
+      if(s && s.some(function(x){return x&&x.r})) return true;
+    }
+    return false;
+  }).length;
+}
 function viewTrain(){
-  var day=DAYS.filter(function(d){return d.id===S.dayId})[0], dl=isDeload(S.week);
+  var day=DAYS.filter(function(d){return d.id===S.dayId})[0], dl=isDeload(S.week);if(day.id==='rest'){
+    var restDone=weekComplete(S.week), restN=trainedCount(S.week);
+    var rh='<div class="days">'+DAYS.map(function(d){
+      return '<button class="day'+(d.id===S.dayId?' on':'')+'" data-d="'+d.id+'"><i>'+d.day+'</i>'+d.label+'</button>';
+    }).join('')+'</div><main>';
+    rh+='<div class="rest-card"><div class="rest-h">Rest Day</div>'+
+        '<div class="rest-sub">Recovery. Log your weight, take an easy walk.</div>'+
+        '<div class="rest-prog">'+restN+' / 6 sessions complete this week</div>';
+    if(S.week<12){
+      rh+='<button class="nextwk'+(restDone?'':' off')+'" id="nextWk"'+(restDone?'':' disabled')+'>'+
+          (restDone?'Complete Week '+S.week+' → Start Week '+(S.week+1):'Finish all 6 sessions to advance')+'</button>';
+      if(restDone) rh+='<div class="nextwk-sub">Carries your weights forward with earned increases. Reps stay blank.</div>';
+    }
+    return rh+'</div></main>';
+  }
   var h='<div class="days">'+DAYS.map(function(d){
     return '<button class="day'+(d.id===S.dayId?' on':'')+'" data-d="'+d.id+'"><i>'+d.day+'</i>'+d.label+'</button>';
   }).join('')+'</div>';
-  h+='<div style="padding:0 16px 8px;font-size:12px;color:var(--dim)">'+day.focus+' focus · '+day.ex.length+' exercises</div><main>';
+  h+='<div style="padding:0 16px 8px;font-size:12px;color:var(--dim)">'+day.focus+' focus · '+day.ex.length+' exercises</div>';
+  h+='<main>';
 
   day.ex.forEach(function(ex,i){
     var vd=verdict(ex,i), n=setsFor(ex.s), sets=S.log[K(S.week,S.dayId,i)]||[], last=lastSession(i);
@@ -673,10 +746,10 @@ function viewTrain(){
     else if(vd.st==='deload') h+='<div class="v-dl">Deload logged. No progression this week — that\'s the point.</div>';
     else h+=swapPanel(ex,i);
     h+='</div></div>';
-  });
+    });
+ 
   return h+'</main>';
 }
-
 function viewCardio(){
   var c=cardioFor(S.week);
   return '<main style="padding-top:18px">'+
@@ -781,7 +854,10 @@ function rule(t,bad){ return '<div class="rule'+(bad?' bad':'')+'"><div class="d
 /* ══════════════════════════════════════════════════
    EVENTS
    ══════════════════════════════════════════════════ */
-function bind(){
+function bind(){var nw=document.getElementById('nextWk');
+  if(nw) nw.onclick=function(){
+    if(confirm('Load Week '+(S.week+1)+'? Weights carry forward (with earned increases). Reps stay blank.')) startNextWeek();
+  };
   document.querySelectorAll('[data-w]').forEach(function(b){
     b.onclick=function(){ S.week=+b.dataset.w; save('rc:week',S.week); render(); };
   });
@@ -856,4 +932,4 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 </body>
-</html>
+</html>}
