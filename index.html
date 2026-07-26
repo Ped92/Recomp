@@ -341,7 +341,7 @@ var DAYS=[
 {id:'legsA',label:'Legs A',focus:'Quads',day:'Wed',ex:[
  {n:'Barbell Back Squat',s:4,r:[5,8],rpe:'8',rest:210,inc:5,sub:['Hack Squat','Safety-Bar Squat'],never:1},
  {n:'Leg Press',s:3,r:[10,12],rpe:'8–9',rest:150,inc:10,sub:['Hack Squat','Pendulum Squat']},
- {n:'Bulgarian Split Squat (DB)',s:3,r:[10,12],rpe:'8–9',rest:120,inc:2,sub:['Walking Lunge','Smith Split Squat'],unit:'per leg'},
+ {n:'Bulgarian Split Squat (DB)',s:3,r:[20,24],perLeg:[10,12],rpe:'8–9',rest:120,inc:2,sub:['Walking Lunge','Smith Split Squat'],unit:'per leg'},
  {n:'Leg Extension',s:4,r:[12,15],rpe:'9–10',rest:90,inc:5,sub:['Sissy Squat','Single-Leg Extension']},
  {n:'Lying Leg Curl',s:3,r:[10,12],rpe:'9',rest:90,inc:5,sub:['Seated Leg Curl','Nordic Curl']},
  {n:'Standing Calf Raise',s:4,r:[10,12],rpe:'9–10',rest:90,inc:5,sub:['Smith Calf Raise','Leg Press Calf Raise']},
@@ -368,7 +368,7 @@ var DAYS=[
  {n:'Hack Squat',s:4,r:[8,10],rpe:'8',rest:180,inc:5,sub:['Front Squat','Leg Press (high foot)']},
  {n:'Seated Leg Curl',s:4,r:[10,12],rpe:'9',rest:120,inc:5,sub:['Lying Leg Curl','Standing Single-Leg Curl']},
  {n:'Hip Thrust (barbell)',s:3,r:[10,12],rpe:'8–9',rest:120,inc:5,sub:['Glute Bridge Machine','Cable Pull-Through']},
- {n:'Walking DB Lunge',s:3,r:[12,12],rpe:'8–9',rest:120,inc:2,sub:['Reverse Lunge','Step-Up'],unit:'per leg'},
+ {n:'Walking DB Lunge',s:3,r:[12,12],perLeg:[6,6],rpe:'8–9',rest:120,inc:2,sub:['Reverse Lunge','Step-Up'],unit:'per leg'},,
  {n:'Leg Extension',s:3,r:[12,15],rpe:'9–10',rest:90,inc:5,sub:['Sissy Squat','High-Rep Goblet Squat']},
  {n:'Seated Calf Raise',s:4,r:[12,15],rpe:'9–10',rest:75,inc:5,sub:['Leg Press Calf Raise','Donkey Calf Raise']},
  {n:'Ab Wheel Rollout',s:3,r:[10,12],rpe:'9',rest:60,inc:0,sub:['Hanging Leg Raise','Weighted Plank']}]}
@@ -628,7 +628,8 @@ function viewTrain(){
 
   day.ex.forEach(function(ex,i){
     var vd=verdict(ex,i), n=setsFor(ex.s), sets=S.log[K(S.week,S.dayId,i)]||[], last=lastSession(i);
-    var rng = ex.r[0]===ex.r[1] ? ex.r[0] : ex.r[0]+'–'+ex.r[1];
+    var rngSrc = ex.perLeg || ex.r;
+    var rng = rngSrc[0]===rngSrc[1] ? rngSrc[0] : rngSrc[0]+'–'+rngSrc[1];
     var rest = Math.floor(ex.rest/60)+':'+String(ex.rest%60).padStart(2,'0');
 
     h+='<div class="ex'+(vd.st==='hot'?' hot':'')+'">';
